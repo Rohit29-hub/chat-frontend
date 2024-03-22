@@ -4,7 +4,7 @@ import user1Img from "./assets/user1.jpeg";
 import user2Img from "./assets/user2.jpeg";
 import "./App.css";
 
-const SOCKET_URL = "http://192.168.0.103:3000";
+const SOCKET_URL = "https://chat-backend-lma6.onrender.com/";
 
 const App = () => {
   const [message, setMessage] = useState("");
