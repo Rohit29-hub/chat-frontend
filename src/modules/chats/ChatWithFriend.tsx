@@ -6,6 +6,7 @@ import { useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { jwtDecode } from 'jwt-decode';
 import { addMessage, addMessages } from '../../redux/slices/chatSlice';
+import { useSidebar } from '../../context/sideBarToggleProvider';
 
 type jwtDecodeData = {
     _id: string,
@@ -20,7 +21,7 @@ const ChatWithFriend = () => {
     const { my_socket_id, my_socket } = useSelector((states: any) => states.socket);
     const { messages } = useSelector((states: any) => states.chats);
     const dispatch = useDispatch();
-
+    const {toggleSidebar} = useSidebar();
     const token = localStorage.getItem('token');
     const info = jwtDecode<jwtDecodeData>(token!);
 
@@ -29,6 +30,7 @@ const ChatWithFriend = () => {
             try {
                 if (!token) return navigate('/login');
                 const userId = params.get('userid');
+
                 const response = await fetch(`https://chat-backend-puxf.onrender.com/api/user/get_user_details/${userId}`, {
                     method: 'GET',
                     headers: {
@@ -38,6 +40,7 @@ const ChatWithFriend = () => {
                 })
 
                 const data = await response.json();
+
                 setFriendData(data.body.profile);
 
             } catch (err) {
@@ -52,6 +55,7 @@ const ChatWithFriend = () => {
             try {
                 if (!token) return navigate('/login');
                 const userId = params.get('userid');
+
                 const response = await fetch(`https://chat-backend-puxf.onrender.com/api/message/getMessage/${userId}/${info._id}`, {
                     method: 'GET',
                     headers: {
@@ -118,20 +122,20 @@ const ChatWithFriend = () => {
     }
 
     return friendData ? (
-        <div className="chat_box_top_bar bg-white flex flex-col items-center justify-between rounded shadow-md w-full h-full">
-            <div className="w-full h-16 flex items-center justify-between p-2">
+        <div className="chat_box_top_bar bg-white flex flex-col items-center justify-between rounded shadow-md w-full h-full relative">
+            <div className="w-full h-16 flex items-center justify-between p-2 border-b shadow">
                 <div className="flex gap-x-2 items-center">
                     <img src={friendData.img} alt="" className="w-10 h-10" />
                     <h1>{friendData.username}</h1>
                 </div>
-                <div>
+                <div className='flex gap-x-3'>
                     <button onClick={() => {
                         alert('Logout button not working right now !')
                     }} title="Logout" className="flex gap-x-2">
                         Logout
                         <LogOut />
                     </button>
-                    <button type="button" className="font-normal sm:hidden block"><Menu /></button>
+                    <button type="button" onClick={toggleSidebar} className="font-normal sm:hidden block"><Menu /></button>
                 </div>
             </div>
             <div className='chat_box w-full overflow-y-auto flex-1 bg-white rounded shadow-md px-3'>
@@ -161,7 +165,7 @@ const ChatWithFriend = () => {
                 </button>
             </div>
         </div>
-    ) : <div className='w-full h-screen flex items-center justify-normal'>Loading...</div>
+    ) : <div className='w-full h-screen flex items-center justify-center'>Loading...</div>
 }
 
 export default ChatWithFriend

@@ -9,6 +9,7 @@ type userInfo = {
 
 const Register = () => {
   const navigate = useNavigate();
+  const [loading, setLoading] = useState(false);
   const [userInfo, setUserInfo] = useState<userInfo>({
     fullname: '',
     email: '',
@@ -22,8 +23,9 @@ const Register = () => {
   const onSubmit = async (e: FormEvent) => {
     e.preventDefault();
     try {
-
+      setLoading(true);
       if (userInfo.fullname == '' || userInfo.email == '' || userInfo.password == '') {
+        setLoading(false);
         alert('Please fill all the fields');
         return;
       }
@@ -35,9 +37,9 @@ const Register = () => {
         },
         body: JSON.stringify(userInfo)
       })
-
       const data = await response.json();
-
+      
+      setLoading(false);
       if (!data.success) {
         alert(data.message);
         return;
@@ -53,7 +55,7 @@ const Register = () => {
 
   return (
     <>
-      <div className="bg-gray-100 flex items-center justify-center h-screen">
+      <div className="bg-gray-100 flex items-center justify-center h-screen relative">
         <div className="bg-white p-8 rounded shadow-md w-full max-w-md">
           <h2 className="text-2xl font-semibold mb-6">Signup Form</h2>
           <form onSubmit={onSubmit}>
@@ -83,6 +85,13 @@ const Register = () => {
             </div>
           </form>
         </div>
+        {loading && (
+          <div className="w-full h-screen flex  flex-col gap-y-2  items-center justify-center absolute top-0 left-0 right-0 z-10 backdrop-blur-md">
+            <p>Loading...</p>
+            <p>Please wait because server is slow !</p>
+          </div>
+        )
+        }
       </div>
     </>
   )

@@ -5,6 +5,7 @@ import { Link, Outlet, useNavigate } from 'react-router-dom';
 import { io } from 'socket.io-client';
 import { addSocket } from '../../redux/slices/socketSlice';
 import { addMessage } from '../../redux/slices/chatSlice';
+import { useSidebar } from '../../context/sideBarToggleProvider';
 
 export type userType = {
     username: string,
@@ -18,7 +19,7 @@ const ChatHome = () => {
     const [userData, setUserData] = useState<userType | null>(null);
     const [onlineUsers, setOnlineUsers] = useState<Array<any> | null>(null);
     const { my_socket_id } = useSelector((states: any) => states.socket);
-
+    const {isSidebarHidden} = useSidebar();
     // getting user data from a server
     useEffect(() => {
         const getUser = async () => {
@@ -92,8 +93,8 @@ const ChatHome = () => {
     }, [])
 
     return userData && my_socket_id ? (
-        <div className="bg-gray-100 w-full h-screen flex p-2 border-2 gap-2">
-            <div className="sidebar w-96 hidden sm:block bg-white flex-shrink-0 h-full p-2 rounded shadow-md">
+        <div className="bg-gray-100 mr-4 absolute left-0 sm:relative w-full h-screen flex p-2 border-2 gap-2">
+            <div className={`sidebar w-56 mr-4 absolute left-0 sm:relative z-50 ${isSidebarHidden ? 'block' : 'hidden'} sm:block  bg-white flex-shrink-0 h-full p-2 rounded shadow-md`}>
                 <div className="w-full h-full flex flex-col gap-y-3 px-3">
                     {
                         <div className="w-full sticky top-0 pb-3 flex justify-between items-center">
