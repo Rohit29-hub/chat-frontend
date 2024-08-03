@@ -18,7 +18,11 @@ const Chats = createSlice({
     } as initialStateType,
     reducers: {
         addMessage: (state, action) => {
-            state.messages?.push(action.payload);
+            if(state.messages == null){
+                state.messages = [action.payload];
+            }else{
+                state.messages.push(action.payload);
+            }
         },
         addMessages: (state, action) => {
             state.messages = action.payload;
