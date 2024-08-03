@@ -60,7 +60,7 @@ const ChatWithFriend = () => {
                 if (!token) return navigate('/login');
                 const userId = params.get('userid');
 
-                const response = await fetch(`http://localhost:8000/api/user/get_user_details/${userId}`, {
+                const response = await fetch(`https://chat-backend-puxf.onrender.com/api/user/get_user_details/${userId}`, {
                     method: 'GET',
                     headers: {
                         'Content-Type': 'application/json',
@@ -85,7 +85,7 @@ const ChatWithFriend = () => {
                 if (!token) return navigate('/login');
                 const userId = params.get('userid');
 
-                const response = await fetch(`http://localhost:8000/api/message/getMessage/${userId}/${info._id}`, {
+                const response = await fetch(`https://chat-backend-puxf.onrender.com/api/message/getMessage/${userId}/${info._id}`, {
                     method: 'GET',
                     headers: {
                         'Content-Type': 'application/json',
