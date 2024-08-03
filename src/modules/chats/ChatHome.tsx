@@ -26,7 +26,7 @@ const ChatHome = () => {
             const token = localStorage.getItem('token');
             if (!token) return navigate('/login');
 
-            const res = await fetch('https://chat-backend-puxf.onrender.com/api/user/get_user_details', {
+            const res = await fetch('http://localhost:8000/api/user/get_user_details', {
                 method: 'GET',
                 headers: {
                     'Content-Type': 'application/json',
@@ -48,7 +48,7 @@ const ChatHome = () => {
 
     // established a socket connection with server
     useEffect(() => {
-        const socket = io('https://chat-backend-puxf.onrender.com', {
+        const socket = io('http://localhost:8000', {
             auth: {
                 token: localStorage.getItem('token'),
             }

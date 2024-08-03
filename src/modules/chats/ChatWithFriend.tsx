@@ -12,6 +12,35 @@ type jwtDecodeData = {
     _id: string,
 }
 
+function getTimeDifference(pastDate: string) {
+    // Parse the dates if they are strings
+    const pastDateTime = new Date(pastDate);
+    const currentDate = new Date();
+    // Calculate the difference in milliseconds
+    const timeDifferenceMs = currentDate.getTime() - pastDateTime.getTime();
+    
+    // Define time constants
+    const millisecondsInSecond = 1000;
+    const millisecondsInMinute = millisecondsInSecond * 60;
+    const millisecondsInHour = millisecondsInMinute * 60;
+    const millisecondsInDay = millisecondsInHour * 24;
+
+    // Calculate differences in various units
+    const minutes = Math.floor(timeDifferenceMs / millisecondsInMinute);
+    const hours = Math.floor(timeDifferenceMs / millisecondsInHour);
+    const days = Math.floor(timeDifferenceMs / millisecondsInDay);
+
+    // Determine the appropriate unit to use
+    if (days > 0) {
+        return `${days} day${days > 1 ? 's' : ''} ago`;
+    } else if (hours > 0) {
+        return `${hours} hour${hours > 1 ? 's' : ''} ago`;
+    } else if (minutes > 0) {
+        return `${minutes} minute${minutes > 1 ? 's' : ''} ago`;
+    } else {
+        return `just now`;
+    }
+}
 const ChatWithFriend = () => {
     const [friendData, setFriendData] = useState<userType | null>(null);
     const [message, setMessage] = useState<string>("");
@@ -31,7 +60,7 @@ const ChatWithFriend = () => {
                 if (!token) return navigate('/login');
                 const userId = params.get('userid');
 
-                const response = await fetch(`https://chat-backend-puxf.onrender.com/api/user/get_user_details/${userId}`, {
+                const response = await fetch(`http://localhost:8000/api/user/get_user_details/${userId}`, {
                     method: 'GET',
                     headers: {
                         'Content-Type': 'application/json',
@@ -56,7 +85,7 @@ const ChatWithFriend = () => {
                 if (!token) return navigate('/login');
                 const userId = params.get('userid');
 
-                const response = await fetch(`https://chat-backend-puxf.onrender.com/api/message/getMessage/${userId}/${info._id}`, {
+                const response = await fetch(`http://localhost:8000/api/message/getMessage/${userId}/${info._id}`, {
                     method: 'GET',
                     headers: {
                         'Content-Type': 'application/json',
@@ -146,7 +175,7 @@ const ChatWithFriend = () => {
                                 <div key={index} className={`flex gap-x-2 items-center mt-2 ${messageData.sender === info._id ? 'justify-end' : 'justify-start'}`}>
                                     <div className={`px-3 py-1 ${messageData.sender === info._id ? 'bg-green-400' : 'bg-red-400'} rounded-lg`}>
                                         <p className='text-sm font-medium'>{messageData.message.message}</p>
-                                        <p className='text-xs'>{new Date(messageData.timestamps).getMinutes() + "m ago"}</p>
+                                        <p className='text-xs'>{getTimeDifference(messageData.timestamps)}</p>
                                     </div>
                                 </div>
                             ))
