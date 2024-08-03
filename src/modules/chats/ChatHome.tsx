@@ -1,7 +1,7 @@
 import { Edit } from 'lucide-react';
 import { useEffect, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux';
-import { Link, Outlet, useNavigate } from 'react-router-dom';
+import { Outlet, useNavigate } from 'react-router-dom';
 import { io } from 'socket.io-client';
 import { addSocket } from '../../redux/slices/socketSlice';
 import { addMessage } from '../../redux/slices/chatSlice';
@@ -19,7 +19,8 @@ const ChatHome = () => {
     const [userData, setUserData] = useState<userType | null>(null);
     const [onlineUsers, setOnlineUsers] = useState<Array<any> | null>(null);
     const { my_socket_id } = useSelector((states: any) => states.socket);
-    const {isSidebarHidden} = useSidebar();
+    const {isSidebarHidden,toggleSidebar} = useSidebar();
+
     // getting user data from a server
     useEffect(() => {
         const getUser = async () => {
@@ -93,6 +94,11 @@ const ChatHome = () => {
 
     }, [])
 
+    const connectWithFriend = (socketid: string, userid: string) => {
+        navigate(`/chats/${socketid}?userid=${userid}`);
+        toggleSidebar();
+    }
+
     return userData && my_socket_id ? (
         <div className="bg-gray-100 mr-4 absolute left-0 sm:relative w-full h-screen flex p-2 border-2 gap-2">
             <div className={`sidebar w-56 mr-4 absolute left-0 sm:relative z-50 ${isSidebarHidden ? 'block' : 'hidden'} sm:block  bg-white flex-shrink-0 h-full p-2 rounded shadow-md`}>
@@ -110,7 +116,7 @@ const ChatHome = () => {
                         {
                             (onlineUsers?.length != 1 && onlineUsers != null) ? onlineUsers.map(([key, user]: any) => (
                                 key != my_socket_id ? (
-                                    <Link to={`/chats/${key}?userid=${user.user}`} key={key} className="my-4 flex gap-x-2 items-center">
+                                    <div key={key} onClick={() => connectWithFriend(key,user.user)} className="my-4 flex gap-x-2 items-center">
                                         <div className="relative">
                                             <img src={user.img} alt="" className="w-10 h-10" />
                                             <div className="absolute right-0 bottom-0 p-1 rounded-full bg-green-400 border-2 border-white"></div>
@@ -120,7 +126,7 @@ const ChatHome = () => {
                                             <h1 className="font-normal">{user.username}</h1>
                                             <p className="text-xs text-gray-500">Active now</p>
                                         </div>
-                                    </Link>
+                                    </div>
                                 ) : null
                             )) : <div className='mt-2 border rounded-md p-2 border-red-500'>
                                 <p className='text-xl'>Nobody is online</p>
