@@ -58,10 +58,10 @@ const ChatHome = () => {
             dispatch(addSocket(socket));
         })
 
-        socket.on('message', ({ sender, reciver, message, createdAt }) => {
+        socket.on('message', ({ sender, receiver, message, createdAt }) => {
             const data = {
                 sender,
-                reciver,
+                receiver,
                 message,
                 createdAt: new Date(),
             }
@@ -70,7 +70,7 @@ const ChatHome = () => {
             console.log("========-------=======");
             dispatch(addMessage({
                 sender,
-                reciver,
+                receiver,
                 message: data,
                 timestamps: createdAt
             }));
