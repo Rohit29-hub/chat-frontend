@@ -66,7 +66,7 @@ const ChatHome = () => {
                 createdAt: new Date(),
             }
             console.log("========-------=======");
-            console.log(sender, reciver, message, createdAt);
+            console.log(sender, receiver, message, createdAt);
             console.log("========-------=======");
             dispatch(addMessage({
                 sender,
