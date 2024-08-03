@@ -112,6 +112,9 @@ const ChatWithFriend = () => {
     }, [socketId])
 
     const sendMessage = async () => {
+        if(message.trim().length == 0){
+            return;
+        }
         const reciverId = params.get('userid');
         const data = {
             sender: info._id,
@@ -161,7 +164,7 @@ const ChatWithFriend = () => {
 
 
     return friendProfile ? (
-        <div className="chat_box_top_bar h-screen bg-white flex flex-col items-center justify-between rounded shadow-md w-full h-full relative">
+        <div className="chat_box_top_bar bg-white flex flex-col items-center justify-between rounded shadow-md w-full h-full relative">
             <div onClick={showFriendDetails} className="w-full h-16 flex items-center justify-between p-2 border-b shadow">
                 <div className="flex gap-x-2 items-center">
                     <img src={friendProfile.img} alt="" className="w-10 h-10" />
