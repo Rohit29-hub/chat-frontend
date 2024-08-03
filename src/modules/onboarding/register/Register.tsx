@@ -30,7 +30,7 @@ const Register = () => {
         return;
       }
 
-      const response = await fetch(`http://localhost:8000/api/user/add_user`, {
+      const response = await fetch(`https://chat-backend-puxf.onrender.com/api/user/add_user`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
