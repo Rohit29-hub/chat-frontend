@@ -78,6 +78,7 @@ const ChatHome = () => {
 
 
         socket.on('online_users', (onlineUsers) => {
+            console.log(onlineUsers);
             setOnlineUsers(onlineUsers);
         })
 
@@ -107,7 +108,7 @@ const ChatHome = () => {
                     </div>
                     <div className=''>
                         {
-                            onlineUsers && onlineUsers.map(([key, user]: any) => (
+                            (onlineUsers?.length != 1 && onlineUsers != null) ? onlineUsers.map(([key, user]: any) => (
                                 key != my_socket_id ? (
                                     <Link to={`/chats/${key}?userid=${user.user}`} key={key} className="my-4 flex gap-x-2 items-center">
                                         <div className="relative">
@@ -121,7 +122,10 @@ const ChatHome = () => {
                                         </div>
                                     </Link>
                                 ) : null
-                            ))
+                            )) : <div className='mt-2 border rounded-md p-2 border-red-500'>
+                                <p className='text-xl'>Nobody is online</p>
+                                <p className='text-xs'>wait...</p>
+                            </div>
                         }
                     </div>
                 </div>
