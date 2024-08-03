@@ -56,9 +56,6 @@ const ChatHome = () => {
 
         socket.on('connect', () => {
             dispatch(addSocket(socket));
-            socket.on('message', (msg) => {
-                console.log("this is message: ", msg);
-            })
         })
 
         socket.on('message', ({ sender, reciver, message, createdAt }) => {
@@ -68,6 +65,9 @@ const ChatHome = () => {
                 message,
                 createdAt: new Date(),
             }
+            console.log("========-------=======");
+            console.log(sender, reciver, message, createdAt);
+            console.log("========-------=======");
             dispatch(addMessage({
                 sender,
                 reciver,
