@@ -18,7 +18,7 @@ function getTimeDifference(pastDate: string) {
     const currentDate = new Date();
     // Calculate the difference in milliseconds
     const timeDifferenceMs = currentDate.getTime() - pastDateTime.getTime();
-    
+
     // Define time constants
     const millisecondsInSecond = 1000;
     const millisecondsInMinute = millisecondsInSecond * 60;
@@ -43,7 +43,7 @@ function getTimeDifference(pastDate: string) {
 }
 const ChatWithFriend = () => {
     const [friendData, setFriendData] = useState<any | null>(null);
-    const [friendModal,setFriendModal] = useState(false);
+    const [friendModal, setFriendModal] = useState(false);
     const [friendProfile, setFriendProfile] = useState<userType | null>(null);
     const [message, setMessage] = useState<string>("");
     const params = new URLSearchParams(window.location.search);
@@ -52,7 +52,7 @@ const ChatWithFriend = () => {
     const { my_socket_id, my_socket } = useSelector((states: any) => states.socket);
     const { messages } = useSelector((states: any) => states.chats);
     const dispatch = useDispatch();
-    const {toggleSidebar} = useSidebar();
+    const { toggleSidebar } = useSidebar();
     const token = localStorage.getItem('token');
     const info = jwtDecode<jwtDecodeData>(token!);
 
@@ -112,7 +112,7 @@ const ChatWithFriend = () => {
     }, [socketId])
 
     const sendMessage = async () => {
-        if(message.trim().length == 0){
+        if (message.trim().length == 0) {
             return;
         }
         const reciverId = params.get('userid');
@@ -193,7 +193,7 @@ const ChatWithFriend = () => {
                                 </div>
                             ))
                         ) : (
-                            <div>No messages yet.</div>
+                            <div className='flex items-center justify-center'> <p className='text-xl'>No messages yet.</p></div>
                         )
                     }
                 </div>
@@ -211,11 +211,11 @@ const ChatWithFriend = () => {
                     <div className='absolute left-0 right-0 w-full h-screen p-2 backdrop-blur-md z-50'>
                         <div className='w-full h-full bg-white relative flex items-center justify-center'>
                             <div onClick={() => setFriendModal(false)} className='absolute right-2 top-2 '>
-                                <X/>
+                                <X />
                             </div>
                             <p className='text-black text-xl sm:text-3xl underline'>{friendData.fullname}</p>
                         </div>
-                    </div>  
+                    </div>
                 )
             }
         </div>
