@@ -1,4 +1,4 @@
-import { LogOut, Menu } from 'lucide-react'
+import { LogOut, Menu, X } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { userType } from './ChatHome'
 import { useParams } from 'react-router-dom';
@@ -42,7 +42,9 @@ function getTimeDifference(pastDate: string) {
     }
 }
 const ChatWithFriend = () => {
-    const [friendData, setFriendData] = useState<userType | null>(null);
+    const [friendData, setFriendData] = useState<any | null>(null);
+    const [friendModal,setFriendModal] = useState(false);
+    const [friendProfile, setFriendProfile] = useState<userType | null>(null);
     const [message, setMessage] = useState<string>("");
     const params = new URLSearchParams(window.location.search);
     const { socketId } = useParams();
@@ -53,6 +55,11 @@ const ChatWithFriend = () => {
     const {toggleSidebar} = useSidebar();
     const token = localStorage.getItem('token');
     const info = jwtDecode<jwtDecodeData>(token!);
+
+    const showFriendDetails = () => {
+        console.log("hello world");
+        setFriendModal(true);
+    }
 
     useEffect(() => {
         const getFriendData = async () => {
@@ -70,7 +77,8 @@ const ChatWithFriend = () => {
 
                 const data = await response.json();
 
-                setFriendData(data.body.profile);
+                setFriendData(data.body);
+                setFriendProfile(data.body.profile);
 
             } catch (err) {
                 console.log(err);
@@ -150,12 +158,14 @@ const ChatWithFriend = () => {
             .catch((err) => console.error(err.message))
     }
 
-    return friendData ? (
-        <div className="chat_box_top_bar bg-white flex flex-col items-center justify-between rounded shadow-md w-full h-full relative">
-            <div className="w-full h-16 flex items-center justify-between p-2 border-b shadow">
+
+
+    return friendProfile ? (
+        <div className="chat_box_top_bar h-screen bg-white flex flex-col items-center justify-between rounded shadow-md w-full h-full relative">
+            <div onClick={showFriendDetails} className="w-full h-16 flex items-center justify-between p-2 border-b shadow">
                 <div className="flex gap-x-2 items-center">
-                    <img src={friendData.img} alt="" className="w-10 h-10" />
-                    <h1>{friendData.username}</h1>
+                    <img src={friendProfile.img} alt="" className="w-10 h-10" />
+                    <h1>{friendProfile.username}</h1>
                 </div>
                 <div className='flex gap-x-3'>
                     <button onClick={() => {
@@ -193,6 +203,18 @@ const ChatWithFriend = () => {
                     Send
                 </button>
             </div>
+            {
+                friendModal && (
+                    <div className='absolute left-0 right-0 w-full h-screen p-2 backdrop-blur-md z-50'>
+                        <div className='w-full h-full bg-white relative flex items-center justify-center'>
+                            <div onClick={() => setFriendModal(false)} className='absolute right-2 top-2 '>
+                                <X/>
+                            </div>
+                            <p className='text-black text-xl sm:text-3xl underline'>{friendData.fullname}</p>
+                        </div>
+                    </div>  
+                )
+            }
         </div>
     ) : <div className='w-full h-screen flex items-center justify-center'>Loading...</div>
 }
