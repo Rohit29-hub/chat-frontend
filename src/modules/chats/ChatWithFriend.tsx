@@ -4,13 +4,8 @@ import { userType } from './ChatHome'
 import { useParams } from 'react-router-dom';
 import { useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
-import { jwtDecode } from 'jwt-decode';
 import { addMessage, addMessages } from '../../redux/slices/chatSlice';
 import { useSidebar } from '../../context/sideBarToggleProvider';
-
-type jwtDecodeData = {
-    _id: string,
-}
 
 function getTimeDifference(pastDate: string) {
     // Parse the dates if they are strings
@@ -53,7 +48,6 @@ const ChatWithFriend = () => {
     const dispatch = useDispatch();
     const { toggleSidebar } = useSidebar();
     const token = localStorage.getItem('token');
-    const info = jwtDecode<jwtDecodeData>(token!);
 
     const showFriendDetails = () => {
         setFriendModal(true);
@@ -95,7 +89,7 @@ const ChatWithFriend = () => {
         const getMessage = async () => {
             try {
                 if (!token) return navigate('/login');
-                const response = await fetch(`${import.meta.env.VITE_APP_BACKEND_URL}/api/message/getMessage/${userId}/${info._id}`, {
+                const response = await fetch(`${import.meta.env.VITE_APP_BACKEND_URL}/api/message/getMessage/${userId}/${my_socket_id}`, {
                     method: 'GET',
                     headers: {
                         'Content-Type': 'application/json',
@@ -121,7 +115,7 @@ const ChatWithFriend = () => {
         }
 
         const data = {
-            sender: info._id,
+            sender: my_socket_id,
             receiver: userId,
             message,
             timestamps: new Date(),
@@ -141,7 +135,7 @@ const ChatWithFriend = () => {
                 'Authorization': token!
             },
             body: JSON.stringify({
-                sender: info._id,
+                sender: my_socket_id,
                 message: data.message,
                 receiver: userId,
                 timestamps: data.timestamps
@@ -175,8 +169,8 @@ const ChatWithFriend = () => {
                     {
                         messages ? (
                             messages.map((messageData: any, index: number) => (
-                                <div key={index} className={`flex gap-x-2 items-center mt-2 ${messageData.sender === info._id ? 'justify-end' : 'justify-start'}`}>
-                                    <div className={`px-3 py-1 ${messageData.sender === info._id ? 'bg-green-400' : 'bg-red-400'} rounded-lg`}>
+                                <div key={index} className={`flex gap-x-2 items-center mt-2 ${messageData.sender === my_socket_id ? 'justify-end' : 'justify-start'}`}>
+                                    <div className={`px-3 py-1 ${messageData.sender === my_socket_id ? 'bg-green-400' : 'bg-red-400'} rounded-lg`}>
                                         <p className='text-sm font-medium'>{messageData.message}</p>
                                         <p className='text-xs'>{getTimeDifference(messageData.timestamps)}</p>
                                     </div>
