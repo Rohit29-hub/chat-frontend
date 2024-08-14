@@ -25,7 +25,7 @@ const Login = () => {
         e.preventDefault();
         try {
             setLoading(true);
-            const response = await fetch('https://chat-backend-puxf.onrender.com/api/user/login', {
+            const response = await fetch(`${import.meta.env.VITE_APP_BACKEND_URL}/api/user/login`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

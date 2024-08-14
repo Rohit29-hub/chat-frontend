@@ -25,7 +25,7 @@ function App() {
                 <Route path='/profile' element={<Profile />} />
                 <Route path='/chats' element={<ChatHome />}>
                     <Route index element={<ChatHomeMsg/>} />
-                    <Route path=':socketId' element={<ChatWithFriend />} />
+                    <Route path=':userId' element={<ChatWithFriend />} />
                 </Route>
             </Routes>
         </SidebarProvider>

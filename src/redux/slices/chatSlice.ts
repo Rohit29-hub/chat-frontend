@@ -2,9 +2,7 @@ import { createSlice } from "@reduxjs/toolkit";
 type messageType = {
     reciver: string,
     sender: string,
-    message: {
-        message: string
-    }
+    message: string,
     timestamps: string
 }
 

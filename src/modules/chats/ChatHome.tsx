@@ -27,7 +27,7 @@ const ChatHome = () => {
             const token = localStorage.getItem('token');
             if (!token) return navigate('/login');
 
-            const res = await fetch('https://chat-backend-puxf.onrender.com/api/user/get_user_details', {
+            const res = await fetch(`${import.meta.env.VITE_APP_BACKEND_URL}/api/user/get_user_details`, {
                 method: 'GET',
                 headers: {
                     'Content-Type': 'application/json',
@@ -49,7 +49,7 @@ const ChatHome = () => {
 
     // established a socket connection with server
     useEffect(() => {
-        const socket = io('https://chat-backend-puxf.onrender.com', {
+        const socket = io(`${import.meta.env.VITE_APP_BACKEND_URL}`, {
             auth: {
                 token: localStorage.getItem('token'),
             }
@@ -59,33 +59,17 @@ const ChatHome = () => {
             dispatch(addSocket(socket));
         })
 
-        socket.on('message', ({ sender, receiver, message, createdAt }) => {
-            const data = {
-                sender,
-                receiver,
-                message,
-                createdAt: new Date(),
-            }
-            console.log("========-------=======");
-            console.log(sender, receiver, message, createdAt);
-            console.log("========-------=======");
-            dispatch(addMessage({
-                sender,
-                receiver,
-                message: data,
-                timestamps: createdAt
-            }));
+        socket.on('message', (data) => {
+            dispatch(addMessage(data));
         })
 
 
         socket.on('online_users', (onlineUsers) => {
-            console.log(onlineUsers);
             setOnlineUsers(onlineUsers);
         })
 
         socket.on('disconnect', () => {
             dispatch(addSocket(null));
-            console.log('Disconnected from server');
         })
 
         return () => {
@@ -94,8 +78,8 @@ const ChatHome = () => {
 
     }, [])
 
-    const connectWithFriend = (socketid: string, userid: string) => {
-        navigate(`/chats/${socketid}?userid=${userid}`);
+    const connectWithFriend = (userid: string) => {
+        navigate(`/chats/${userid}`);
         toggleSidebar();
     }
 
@@ -116,7 +100,7 @@ const ChatHome = () => {
                         {
                             (onlineUsers?.length != 1 && onlineUsers != null) ? onlineUsers.map(([key, user]: any) => (
                                 key != my_socket_id ? (
-                                    <div key={key} onClick={() => connectWithFriend(key,user.user)} className="my-4 flex gap-x-2 items-center">
+                                    <div key={key} onClick={() => connectWithFriend(user.user)} className="my-4 flex gap-x-2 items-center">
                                         <div className="relative">
                                             <img src={user.img} alt="" className="w-10 h-10" />
                                             <div className="absolute right-0 bottom-0 p-1 rounded-full bg-green-400 border-2 border-white"></div>

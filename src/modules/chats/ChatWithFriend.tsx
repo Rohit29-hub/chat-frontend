@@ -1,5 +1,5 @@
 import { LogOut, Menu, X } from 'lucide-react'
-import { useEffect, useState } from 'react'
+import { FormEvent, useEffect, useRef, useState } from 'react'
 import { userType } from './ChatHome'
 import { useParams } from 'react-router-dom';
 import { useNavigate } from 'react-router-dom';
@@ -46,8 +46,7 @@ const ChatWithFriend = () => {
     const [friendModal, setFriendModal] = useState(false);
     const [friendProfile, setFriendProfile] = useState<userType | null>(null);
     const [message, setMessage] = useState<string>("");
-    const params = new URLSearchParams(window.location.search);
-    const { socketId } = useParams();
+    const { userId } = useParams();
     const navigate = useNavigate();
     const { my_socket_id, my_socket } = useSelector((states: any) => states.socket);
     const { messages } = useSelector((states: any) => states.chats);
@@ -57,17 +56,22 @@ const ChatWithFriend = () => {
     const info = jwtDecode<jwtDecodeData>(token!);
 
     const showFriendDetails = () => {
-        console.log("hello world");
         setFriendModal(true);
     }
+
+    const endOfMessagesRef = useRef<HTMLDivElement | null>(null);
+
+    useEffect(() => {
+        if (endOfMessagesRef.current) {
+            endOfMessagesRef.current.scrollIntoView({ behavior: 'smooth' });
+        }
+    }, [messages]);
 
     useEffect(() => {
         const getFriendData = async () => {
             try {
                 if (!token) return navigate('/login');
-                const userId = params.get('userid');
-
-                const response = await fetch(`https://chat-backend-puxf.onrender.com/api/user/get_user_details/${userId}`, {
+                const response = await fetch(`${import.meta.env.VITE_APP_BACKEND_URL}/api/user/get_user_details/${userId}`, {
                     method: 'GET',
                     headers: {
                         'Content-Type': 'application/json',
@@ -85,15 +89,13 @@ const ChatWithFriend = () => {
             }
         }
         getFriendData();
-    }, [socketId])
+    }, [userId])
 
     useEffect(() => {
         const getMessage = async () => {
             try {
                 if (!token) return navigate('/login');
-                const userId = params.get('userid');
-
-                const response = await fetch(`https://chat-backend-puxf.onrender.com/api/message/getMessage/${userId}/${info._id}`, {
+                const response = await fetch(`${import.meta.env.VITE_APP_BACKEND_URL}/api/message/getMessage/${userId}/${info._id}`, {
                     method: 'GET',
                     headers: {
                         'Content-Type': 'application/json',
@@ -109,52 +111,40 @@ const ChatWithFriend = () => {
             }
         }
         getMessage();
-    }, [socketId])
+    }, [userId])
 
-    const sendMessage = async () => {
+    const sendMessage = async (e: FormEvent) => {
+        e.preventDefault();
+        
         if (message.trim().length == 0) {
             return;
         }
-        const reciverId = params.get('userid');
+
         const data = {
             sender: info._id,
-            receiver: reciverId,
+            receiver: userId,
             message,
-            createdAt: new Date(),
+            timestamps: new Date(),
         }
 
         if (my_socket.connected) {
-            my_socket.emit('message', {
-                sender: info._id,
-                receiver: reciverId,
-                socketinfo: {
-                    sender: my_socket_id,
-                    receiver: socketId,
-                },
-                message,
-                createdAt: new Date(),
-            });
-
+            my_socket.emit('message', data);
             setMessage("");
         }
 
-        dispatch(addMessage({
-            sender: info._id,
-            reciver: reciverId,
-            message: data,
-            timestamps: new Date()
-        }))
+        dispatch(addMessage(data))
 
-        fetch('https://chat-backend-puxf.onrender.com/api/message/add_message', {
+        fetch(`${import.meta.env.VITE_APP_BACKEND_URL}/api/message/add_message`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
                 'Authorization': token!
             },
             body: JSON.stringify({
-                senderId: info._id,
-                message: data,
-                reciverId,
+                sender: info._id,
+                message: data.message,
+                receiver: userId,
+                timestamps: data.timestamps
             })
         }).then((data) => data.json())
             .then(() => console.log("message saved !"))
@@ -187,7 +177,7 @@ const ChatWithFriend = () => {
                             messages.map((messageData: any, index: number) => (
                                 <div key={index} className={`flex gap-x-2 items-center mt-2 ${messageData.sender === info._id ? 'justify-end' : 'justify-start'}`}>
                                     <div className={`px-3 py-1 ${messageData.sender === info._id ? 'bg-green-400' : 'bg-red-400'} rounded-lg`}>
-                                        <p className='text-sm font-medium'>{messageData.message.message}</p>
+                                        <p className='text-sm font-medium'>{messageData.message}</p>
                                         <p className='text-xs'>{getTimeDifference(messageData.timestamps)}</p>
                                     </div>
                                 </div>
@@ -196,16 +186,17 @@ const ChatWithFriend = () => {
                             <div className='flex items-center justify-center'> <p className='text-xl'>No messages yet.</p></div>
                         )
                     }
+                    <div ref={endOfMessagesRef} />
                 </div>
             </div>
-            <div className='chat_box w-full h-20 p-2 gap-x-2 flex items-center bg-white rounded shadow-md'>
+            <form onSubmit={sendMessage} className='chat_box w-full h-20 p-2 gap-x-2 flex items-center bg-white rounded shadow-md'>
                 <input type="text" value={message} onChange={(e) => setMessage(e.target.value)} id="message" name="message" placeholder="Your message here"
                     className="mt-1 block w-full px-3 py-2 border-2 border-gray-200 rounded-md shadow-sm focus:outline-none focus:border-blue-500 focus:ring focus:ring-blue-200 transition duration-150" />
-                <button onClick={sendMessage} type="submit"
+                <button type="submit"
                     className=" bg-blue-500 hover:bg-blue-600 flex-shrink-0 text-white font-semibold py-2 px-6 rounded focus:outline-none focus:shadow-outline">
                     Send
                 </button>
-            </div>
+            </form>
             {
                 friendModal && (
                     <div className='absolute left-0 right-0 w-full h-screen p-2 backdrop-blur-md z-50'>
