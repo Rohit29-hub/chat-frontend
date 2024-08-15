@@ -6,6 +6,7 @@ import { useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { addMessage, addMessages } from '../../redux/slices/chatSlice';
 import { useSidebar } from '../../context/sideBarToggleProvider';
+import { jwtDecode } from 'jwt-decode';
 
 function getTimeDifference(pastDate: string) {
     // Parse the dates if they are strings
@@ -43,11 +44,14 @@ const ChatWithFriend = () => {
     const [message, setMessage] = useState<string>("");
     const { userId } = useParams();
     const navigate = useNavigate();
-    const { my_socket_id, my_socket } = useSelector((states: any) => states.socket);
+    const { my_socket } = useSelector((states: any) => states.socket);
     const { messages } = useSelector((states: any) => states.chats);
     const dispatch = useDispatch();
     const { toggleSidebar } = useSidebar();
     const token = localStorage.getItem('token');
+    const {_id} = jwtDecode<{
+        _id: string
+    }>(token!)
 
     const showFriendDetails = () => {
         setFriendModal(true);
@@ -89,7 +93,7 @@ const ChatWithFriend = () => {
         const getMessage = async () => {
             try {
                 if (!token) return navigate('/login');
-                const response = await fetch(`${import.meta.env.VITE_APP_BACKEND_URL}/api/message/getMessage/${userId}/${my_socket_id}`, {
+                const response = await fetch(`${import.meta.env.VITE_APP_BACKEND_URL}/api/message/getMessage/${userId}/${_id}`, {
                     method: 'GET',
                     headers: {
                         'Content-Type': 'application/json',
@@ -115,7 +119,7 @@ const ChatWithFriend = () => {
         }
 
         const data = {
-            sender: my_socket_id,
+            sender: _id,
             receiver: userId,
             message,
             timestamps: new Date(),
@@ -135,7 +139,7 @@ const ChatWithFriend = () => {
                 'Authorization': token!
             },
             body: JSON.stringify({
-                sender: my_socket_id,
+                sender: _id,
                 message: data.message,
                 receiver: userId,
                 timestamps: data.timestamps
@@ -143,6 +147,12 @@ const ChatWithFriend = () => {
         }).then((data) => data.json())
             .then(() => console.log("message saved !"))
             .catch((err) => console.error(err.message))
+    }
+
+
+    function doLogout(){
+        localStorage.removeItem('token');
+        navigate('/login');
     }
 
 
@@ -155,9 +165,7 @@ const ChatWithFriend = () => {
                     <h1>{friendProfile.username}</h1>
                 </div>
                 <div className='flex gap-x-3'>
-                    <button onClick={() => {
-                        alert('Logout button not working right now !')
-                    }} title="Logout" className="flex gap-x-2">
+                    <button onClick={doLogout} title="Logout" className="flex gap-x-2">
                         Logout
                         <LogOut />
                     </button>
@@ -169,8 +177,8 @@ const ChatWithFriend = () => {
                     {
                         messages ? (
                             messages.map((messageData: any, index: number) => (
-                                <div key={index} className={`flex gap-x-2 items-center mt-2 ${messageData.sender === my_socket_id ? 'justify-end' : 'justify-start'}`}>
-                                    <div className={`px-3 py-1 ${messageData.sender === my_socket_id ? 'bg-green-400' : 'bg-red-400'} rounded-lg`}>
+                                <div key={index} className={`flex gap-x-2 items-center mt-2 ${messageData.sender === _id ? 'justify-end' : 'justify-start'}`}>
+                                    <div className={`px-3 py-1 ${messageData.sender === _id ? 'bg-green-400' : 'bg-red-400'} rounded-lg`}>
                                         <p className='text-sm font-medium'>{messageData.message}</p>
                                         <p className='text-xs'>{getTimeDifference(messageData.timestamps)}</p>
                                     </div>
