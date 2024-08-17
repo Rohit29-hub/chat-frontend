@@ -16,7 +16,7 @@ function App() {
                     <h1 className='text-3xl'>Welcome to RohitChat</h1>
                     <div className='flex flex-row items-center gap-x-3'>
                         <Link to={'/login'} className='px-3 py-2 rounded-md bg-blue-400 text-white'>Login</Link>
-                        <p>Or</p>
+                        <p>OR</p>
                         <Link to={'/register'} className='px-3 py-2 rounded-md bg-blue-400 text-white'>Register</Link>
                     </div>
                 </div>} />
