@@ -1,4 +1,4 @@
-import { Bell, Home, LogOut, MessageCircleMore, Search, SettingsIcon, Sidebar } from 'lucide-react';
+import { Bell, Home, LogOut, MessageCircleMore, Search, SettingsIcon } from 'lucide-react';
 import { useEffect, useState } from 'react'
 import { useDispatch } from 'react-redux';
 import { Link, Outlet, useNavigate } from 'react-router-dom';

@@ -80,7 +80,7 @@ const ChatWithFriend = () => {
     return friendProfile ? (
         <div className="w-full h-full flex flex-col justify-between p-2">
             <nav className='w-full pb-2 border-b flex items-center justify-between'>
-                <div className='flex items-center gap-x-2'>
+                <div className='flex items-center gap-x-2' onClick={() => alert(JSON.stringify(friendData))}>
                     <div>
                         <img className='w-12 h-12 ' src={friendProfile.img} alt="" />
                     </div>
