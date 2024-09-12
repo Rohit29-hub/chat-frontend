@@ -3,6 +3,7 @@ type messageType = {
     reciver: string,
     sender: string,
     message: string,
+    status: string,
     timestamps: string
 }
 

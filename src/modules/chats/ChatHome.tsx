@@ -1,53 +1,40 @@
-import { Edit } from 'lucide-react';
+import { Bell, Home, LogOut, MessageCircleMore, Search, SettingsIcon, Sidebar } from 'lucide-react';
 import { useEffect, useState } from 'react'
-import { useDispatch, useSelector } from 'react-redux';
-import { Outlet, useNavigate } from 'react-router-dom';
+import { useDispatch } from 'react-redux';
+import { Link, Outlet, useNavigate } from 'react-router-dom';
 import { io } from 'socket.io-client';
-import { addSocket } from '../../redux/slices/socketSlice';
 import { addMessage } from '../../redux/slices/chatSlice';
-import { useSidebar } from '../../context/sideBarToggleProvider';
+import { useSocket } from '../../context/socketProvider';
+import { getData } from '../../utils/action';
 
 export type userType = {
+    user: string,
     username: string,
     img: string,
-    desc: string
+    desc: string,
+    status: string
 }
 
 const ChatHome = () => {
     const navigate = useNavigate();
+    const [showSideBar, setShowSideBar] = useState(false);
     const dispatch = useDispatch();
     const [userData, setUserData] = useState<userType | null>(null);
-    const [onlineUsers, setOnlineUsers] = useState<Array<any> | null>(null);
-    const { my_socket_id } = useSelector((states: any) => states.socket);
-    const {isSidebarHidden,toggleSidebar} = useSidebar();
+    const [onlineUsers, setOnlineUsers] = useState<any[] | null>(null);
+    const { handleSocket, mySocketId } = useSocket();
 
     // getting user data from a server
     useEffect(() => {
         const getUser = async () => {
             const token = localStorage.getItem('token');
             if (!token) return navigate('/login');
-
-            const res = await fetch(`${import.meta.env.VITE_APP_BACKEND_URL}/api/user/get_user_details`, {
-                method: 'GET',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': token
-                },
-            })
-
-            const data = await res.json();
-
-            if (!data.success) {
-                return navigate('/login');
-            }
-
-            setUserData(data.body.profile);
+            const data = await getData(token!);
+            setUserData(data.profile);
         }
-
         getUser();
     }, []);
 
-    // established a socket connection with server
+    // Established a socket connection with server and listen all the socket's event
     useEffect(() => {
         const socket = io(`${import.meta.env.VITE_APP_BACKEND_URL}`, {
             auth: {
@@ -56,20 +43,19 @@ const ChatHome = () => {
         })
 
         socket.on('connect', () => {
-            dispatch(addSocket(socket));
+            handleSocket(socket);
         })
 
         socket.on('message', (data) => {
             dispatch(addMessage(data));
         })
 
-
         socket.on('online_users', (onlineUsers) => {
             setOnlineUsers(onlineUsers);
         })
 
         socket.on('disconnect', () => {
-            dispatch(addSocket(null));
+            handleSocket(null);
         })
 
         return () => {
@@ -78,53 +64,77 @@ const ChatHome = () => {
 
     }, [])
 
+
+    // used to connect with friend
     const connectWithFriend = (userid: string) => {
+        setShowSideBar(false);
         navigate(`/chats/${userid}`);
-        toggleSidebar();
     }
 
-    return userData && my_socket_id ? (
-        <div className="bg-gray-100 mr-4 absolute left-0 sm:relative w-full h-screen flex p-2 border-2 gap-2">
-            <div className={`sidebar w-56 mr-4 absolute left-0 sm:relative z-50 ${isSidebarHidden ? 'block' : 'hidden'} sm:block  bg-white flex-shrink-0 h-full p-2 rounded shadow-md`}>
-                <div className="w-full h-full flex flex-col gap-y-3 px-3">
-                    {
-                        <div className="w-full sticky top-0 pb-3 flex justify-between items-center">
-                            <h1 className="font-semibold text-xl">{userData.username}</h1>
-                            <Edit cursor={'pointer'} size={22} />
-                        </div>
-                    }
-                    <div className="pb-3">
-                        <h1 className="text-xl">Messages</h1>
+    return userData && mySocketId ? (
+        <div className="chat-container w-full h-screen bg-[#EFF6FC] gap-4 md:py-2 md:px-4">
+            <div className='md:block hidden navContainer border shadow rounded-2xl bg-[#6E00FF]'>
+                <div className='w-full h-full py-3  flex items-center justify-between flex-col'>
+                    <img className='w-12 h-12 rounded-full border-2 border-[#5322BC]' src={userData.img} alt="" />
+                    <div className='flex-1 w-full flex flex-col gap-y-16 pt-10 items-center'>
+                        <Link to={'/'}><Home size={30} color='white' /></Link>
+                        <Link to={'/'}><MessageCircleMore size={30} color='white' /></Link>
+                        <Link to={'/'}><Bell size={30} color='white' /></Link>
+                        <Link to={'/'}><SettingsIcon size={30} color='white' /></Link>
                     </div>
-                    <div className=''>
-                        {
-                            (onlineUsers?.length != 1 && onlineUsers != null) ? onlineUsers.map(([key, user]: any) => (
-                                key != my_socket_id ? (
-                                    <div key={key} onClick={() => connectWithFriend(user.user)} className="my-4 flex gap-x-2 items-center">
-                                        <div className="relative">
-                                            <img src={user.img} alt="" className="w-10 h-10" />
-                                            <div className="absolute right-0 bottom-0 p-1 rounded-full bg-green-400 border-2 border-white"></div>
-                                        </div>
-                                        <div>
-
-                                            <h1 className="font-normal">{user.username}</h1>
-                                            <p className="text-xs text-gray-500">Active now</p>
-                                        </div>
-                                    </div>
-                                ) : null
-                            )) : <div className='mt-2 border rounded-md p-2 border-red-500'>
-                                <p className='text-xl'>Nobody is online</p>
-                                <p className='text-xs'>wait...</p>
-                            </div>
-                        }
+                    <div>
+                        <LogOut size={30} color='white' />
                     </div>
                 </div>
             </div>
-            <div className="bg-white w-full h-full">
-                <Outlet />
+
+            <div className={`sidebarContainer rounded-2xl ${showSideBar ? 'flex' : 'md:flex hidden'} flex-col gap-y-2 p-2 sm:p-0`}>
+                <div className='w-full h-10 flex items-center px-1 shadow overflow-hidden rounded-2xl relative bg-white border'>
+                    <div className='inline'><Search size={22} color='black' /></div>
+                    <input type="text" className='w-full h-full pl-2 outline-none border-none text-base' placeholder='Search' />
+                </div>
+                <div className='w-full flex-1 flex flex-col gap-3'>
+                    <div className='flex-1 bg-white shadow rounded-xl overflow-hidden px-3'>
+                        <h1 className='text-xl font-medium sticky top-0 bg-white py-3 border-b'>Peoples</h1>
+                        <div className='overflow-y-auto w-full h-full'>
+                            {
+                                onlineUsers ? (onlineUsers.map(([usersKey, userData]: [string, userType]) => (
+                                    mySocketId != usersKey && (
+                                        <div key={usersKey} className='flex w-full py-2 border-b items-center justify-between cursor-pointer hover:bg-gray-100' onClick={() => connectWithFriend(userData.user)}>
+                                            <div className='w-full h-auto flex gap-x-2'>
+                                                <div className='w-11 h-11 relative'>
+                                                    <img className='w-full h-full object-contain rounded-full border-2 border-blue-500' src={userData.img} alt={userData.username} />
+                                                    <span className={`${userData.status == 'online' && 'absolute z-10 left-1 top-0 p-1.5 bg-green-400 rounded-full'}`}></span>
+                                                </div>
+                                                <div>
+                                                    <h1 className={`text-base font-medium`}>
+                                                        {userData.username}
+                                                    </h1>
+                                                    <p className='text-sm text-gray-400'>{userData.status}</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    )
+                                ))) : (
+                                    <div>
+                                        <h1>Loading...</h1>
+                                    </div>
+                                )
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div className='chatViewContainer border overflow-hidden md:rounded-2xl bg-white shadow md:py-3 md:px-4'>
+                <Outlet context={[setShowSideBar]} />
             </div>
         </div>
-    ) : <div className='w-full h-screen flex items-center justify-normal'>Loading...</div>
+    ) : (
+        <div className='w-full h-screen flex items-center justify-normal'>
+            <p>Loading...</p>
+        </div>
+    )
 }
 
-export default ChatHome
+export default ChatHome;

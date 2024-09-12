@@ -1,5 +1,49 @@
-.img_select_border{
+.img_select_border {
     outline: 4px solid rgb(59 130 246);
     border-radius: 100%;
     outline-offset: 4px;
+}
+
+.chat-container {
+    display: grid;
+    grid-template-columns: 70px 0.5fr 2fr;
+    grid-template-rows: 1fr;
+    grid-template-areas:
+        "nav sidebar chatview"
+        "nav sidebar chatview"
+        "nav sidebar chatview";
+}
+
+@media (max-width: 400px) {
+    .chat-container{
+        grid-template-columns: 1fr;
+        grid-template-areas:
+        "chatview"
+        "chatview"
+        "chatview";
+    }
+}
+
+.navContainer {
+    grid-area: nav;
+    height: 100%;
+}
+
+.sidebarContainer {
+    grid-area: sidebar;
+    height: 100%;
+}
+
+.chatViewContainer {
+    grid-area: chatview;
+    height: 100%;
+}
+
+.no-scrollbar::-webkit-scrollbar {
+    display: none;
+}
+
+.no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
 }
