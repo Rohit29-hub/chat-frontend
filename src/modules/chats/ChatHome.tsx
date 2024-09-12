@@ -1,4 +1,4 @@
-import { Bell, Home, LogOut, MessageCircleMore, Search, SettingsIcon } from 'lucide-react';
+import { Bell, Home, LogOut, MessageCircleMore, SettingsIcon } from 'lucide-react';
 import { useEffect, useState } from 'react'
 import { useDispatch } from 'react-redux';
 import { Link, Outlet, useNavigate } from 'react-router-dom';
@@ -89,10 +89,6 @@ const ChatHome = () => {
             </div>
 
             <div className={`sidebarContainer rounded-2xl ${showSideBar ? 'flex' : 'md:flex hidden'} flex-col gap-y-2 p-2 sm:p-0`}>
-                <div className='w-full h-10 flex items-center px-1 shadow overflow-hidden rounded-2xl relative bg-white border'>
-                    <div className='inline'><Search size={22} color='black' /></div>
-                    <input type="text" className='w-full h-full pl-2 outline-none border-none text-base' placeholder='Search' />
-                </div>
                 <div className='w-full flex-1 flex flex-col gap-3'>
                     <div className='flex-1 bg-white shadow rounded-xl overflow-hidden px-3'>
                         <h1 className='text-xl font-medium sticky top-0 bg-white py-3 border-b'>Peoples</h1>
