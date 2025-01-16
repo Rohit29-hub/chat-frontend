@@ -1,4 +1,5 @@
 import { createSlice } from "@reduxjs/toolkit";
+
 type messageType = {
     reciver: string,
     sender: string,

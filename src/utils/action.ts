@@ -62,3 +62,26 @@ export const getData = async (token: string, userId?: string) => {
         console.log(err);
     }
 }
+
+export const updateData = async (token: string, userId: string, updatedData: object) => {
+    try {
+        const url = `${import.meta.env.VITE_APP_BACKEND_URL}/api/user/update_user_details/${userId}`;
+        const response = await fetch(url, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': token
+            },
+            body: JSON.stringify(updatedData)
+        });
+
+        if (!response.ok) {
+            throw new Error('Failed to update user data');
+        }
+
+        const data = await response.json();
+        return data;
+    } catch (err) {
+        console.log(err);
+    }
+};

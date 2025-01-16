@@ -18,7 +18,7 @@ export function getTimeDifference(pastDate: string) {
     const days = Math.floor(timeDifferenceMs / millisecondsInDay);
 
     if (days > 0) {
-        return `${days} day${days > 1 ? 's' : ''} ago`;
+        return `${days >= 7 ? 'Week' : days >= 30 && 'month'} ago`;
     } else if (hours > 0) {
         return `${hours} hour${hours > 1 ? 's' : ''} ago`;
     } else if (minutes > 0) {

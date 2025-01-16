@@ -1,34 +1,29 @@
-import { SmilePlus, Send, MoreVerticalIcon, } from 'lucide-react'
-import { FormEvent, useEffect, useRef, useState } from 'react'
-import { userType } from './ChatHome'
-import { useOutletContext, useParams } from 'react-router-dom';
-import { useNavigate } from 'react-router-dom';
+import { FormEvent, useEffect, useRef, useState } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
-import { addMessage, addMessages } from '../../redux/slices/chatSlice';
 import { jwtDecode } from 'jwt-decode';
+import { addMessage, addMessages } from '../../redux/slices/chatSlice';
 import { useSocket } from '../../context/socketProvider';
+import { MessageType, userType } from '../../types/user';
+import { useTyping } from '../../hooks/useTyping';
 import { getData, getMessage, saveMessage } from '../../utils/action';
+import ChatHeader from '../../components/chat/ChatHeader';
 import MessageList from '../../components/ui/MessageList';
-
+import MessageInput from '../../components/chat/MessageInput';
 
 const ChatWithFriend = () => {
-    const [friendData, setFriendData] = useState<any | null>(null);
     const [friendProfile, setFriendProfile] = useState<userType | null>(null);
-    const [message, setMessage] = useState<string>("");
+    const [message, setMessage] = useState("");
     const { userId } = useParams();
     const navigate = useNavigate();
     const { messages } = useSelector((states: any) => states.chats);
     const { socket } = useSocket();
     const dispatch = useDispatch();
-
-    // use the outletcontext
-    const [setShowSideBar]: any = useOutletContext();
-
-    // using localstorege token
     const token = localStorage.getItem('token');
-    const { _id } = jwtDecode<{ _id: string }>(token!);
-
+    const { _id } = token ? jwtDecode<{ _id: string }>(token) : { _id: '' };
     const endOfMessagesRef = useRef<HTMLDivElement | null>(null);
+
+    const { handleTyping, resetTyping } = useTyping(socket, userId);
 
     useEffect(() => {
         if (endOfMessagesRef.current) {
@@ -36,77 +31,98 @@ const ChatWithFriend = () => {
         }
     }, [messages]);
 
-    // use to get the friend data
     useEffect(() => {
-        if (!token) return navigate('/login');
+
+        if (!token) {
+            navigate('/login');
+            return;
+        }
         const getFriendData = async () => {
-            const data = await getData(token!, userId!);
-            setFriendData(data);
-            setFriendProfile(data.profile);
-        }
+            try {
+                const data = await getData(token, userId!);
+                setFriendProfile(data.profile);
+            } catch (error) {
+                console.error('Error fetching friend data:', error);
+                navigate('/');
+            }
+        };
+
         getFriendData();
-    }, [userId])
+    }, [userId, token, navigate]);
 
-    // use to get the message of the user
     useEffect(() => {
-        const getMsg = async () => {
-            const parsedMessages = await getMessage(token!, userId!, _id);
-            dispatch(addMessages(parsedMessages));
-        }
-        getMsg();
-    }, [userId])
+        const getMessageHistory = async () => {
+            try {
+                const parsedMessages = await getMessage(token!, userId!, _id);
+                dispatch(addMessages(parsedMessages));
+            } catch (error) {
+                console.error('Error fetching messages:', error);
+            }
+        };
 
-    // save the message and push into messages state
+        if (token && userId && _id) {
+            getMessageHistory();
+        }
+    }, [userId, token, _id, dispatch]);
+
+    const handleMessageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        setMessage(e.target.value);
+        handleTyping();
+    };
+
     const sendMessage = async (e: FormEvent) => {
         e.preventDefault();
-        if (message.trim().length == 0) return;
+        if (!message.trim() || !socket) return;
 
-        const data = {
+        const messageData: MessageType = {
             sender: _id,
             receiver: userId!,
-            message,
+            message: message.trim(),
             timestamps: new Date().toISOString(),
-        }
+        };
 
-        if (socket!.connected) {
-            socket!.emit('message', data);
-            setMessage("");
-        }
+        try {
+            if (socket.connected) {
+                socket.emit('message', messageData);
+                setMessage("");
+                resetTyping();
+            }
 
-        dispatch(addMessage(data))
-        saveMessage(token!, data);
+            dispatch(addMessage(messageData));
+            await saveMessage(token!, messageData);
+        } catch (error) {
+            console.error('Error sending message:', error);
+        }
+    };
+
+    if (!friendProfile) {
+        return (
+            <div className='w-full h-screen flex items-center justify-center'>
+                <p>Loading...</p>
+            </div>
+        );
     }
 
-    return friendProfile ? (
+    return (
         <div className="w-full h-full flex flex-col justify-between p-2">
-            <nav className='w-full pb-2 border-b flex items-center justify-between'>
-                <div className='flex items-center gap-x-2' onClick={() => alert(JSON.stringify(friendData))}>
-                    <div>
-                        <img className='w-12 h-12 ' src={friendProfile.img} alt="" />
-                    </div>
-                    <div>
-                        <h1 className='text-xl font-medium'>{friendProfile.username}</h1>
-                    </div>
-                </div>
-                <div className='md:hidden block' onClick={() => setShowSideBar(true)}>
-                    <MoreVerticalIcon/>
-                </div>
-            </nav>
-            <div className='w-full flex-1 overflow-y-auto no-scrollbar'>
-                <MessageList messages={messages} _id={_id} />
-                <div ref={endOfMessagesRef}></div>
-            </div>
-            <div className='w-full h-12 flex items-center gap-x-3'>
-                <div className='w-full h-full border flex items-center gap-x-4 px-4 rounded-2xl overflow-hidden bg-[#EFF6FC]'>
-                    <input value={message} onChange={(e) => setMessage(e.target.value)} className='w-full h-full text-sm font-medium outline-none border-none bg-transparent' type="text" placeholder='Type your message here..' />
-                    <div><SmilePlus size={24} color='black' /></div>
-                </div>
-                <button onClick={sendMessage} className='bg-[#6E00FF] flex-shrink-0 p-2 rounded-md flex items-center justify-center'>
-                    <Send size={24} color='white' />
-                </button>
-            </div>
-        </div>
-    ) : <div className='w-full h-screen flex items-center justify-center'>Loading...</div>
-}
+            <ChatHeader
+                friendProfile={friendProfile}
+                onBackClick={() => navigate('/chats')}
+                onMenuClick={() => alert(friendProfile.desc)}
+            />
 
-export default ChatWithFriend
+            <div className='w-full flex-1 overflow-y-auto no-scrollbar py-4'>
+                <MessageList messages={messages} _id={_id} />
+                <div ref={endOfMessagesRef} />
+            </div>
+
+            <MessageInput
+                message={message}
+                onChange={handleMessageChange}
+                onSend={sendMessage}
+            />
+        </div>
+    );
+};
+
+export default ChatWithFriend;

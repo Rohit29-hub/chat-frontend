@@ -75,7 +75,7 @@ const Profile = () => {
     }, [])
 
     return (
-        <div className="bg-gray-100 flex items-center justify-center min-h-screen relative">
+        <div className="bg-gradient-to-br max-sm:px-2 from-blue-100 via-blue-300 to-blue-500bg-gray-100 flex items-center justify-center min-h-screen relative">
             <div className="bg-white p-8 rounded shadow-md w-full max-w-md">
                 <h2 className="text-2xl font-semibold mb-6">Profile </h2>
                 <div className="grid grid-cols-3 gap-4">
@@ -125,7 +125,6 @@ const Profile = () => {
             {loading && (
                 <div className="w-full h-screen flex  flex-col gap-y-2  items-center justify-center absolute top-0 left-0 right-0 z-10 backdrop-blur-md">
                     <p>Loading...</p>
-                    <p>Please wait because server is slow !</p>
                 </div>
             )
             }
