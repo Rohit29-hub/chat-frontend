@@ -4,7 +4,7 @@ export type userType = {
     username: string;
     img: string;
     desc: string;
-    status: 'online' | 'offline' | 'typing';
+    status: 'true' | 'false';
     lastSeen?: string | Date;
 }
 

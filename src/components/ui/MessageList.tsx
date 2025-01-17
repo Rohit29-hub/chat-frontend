@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useRef } from "react";
 import { getTimeDifference } from "../../utils/helper";
 
 type msgDetailsType = {
@@ -14,8 +14,15 @@ interface MessageListProps {
 }
 
 const MessageList = React.memo(({ messages, _id }: MessageListProps) => {
+    const endOfMessagesRef = useRef<HTMLDivElement | null>(null);
+
+    useEffect(() => {
+        if (endOfMessagesRef.current) {
+            endOfMessagesRef.current.scrollIntoView({ behavior: 'smooth' });
+        }
+    }, [messages]);
     return (
-        <>
+        <div className="w-full flex-1 overflow-y-auto no-scrollbar py-14 md:py-4">
             {messages && messages.length > 0 ? (
                 messages.map((msgDetails, key) => (
                     <div key={key} className={`w-full flex py-3 px-2 ${msgDetails.sender === _id ? 'justify-end' : 'justify-start'}`}>
@@ -37,7 +44,8 @@ const MessageList = React.memo(({ messages, _id }: MessageListProps) => {
                     <p>No Message</p>
                 </div>
             )}
-        </>
+            <div ref={endOfMessagesRef} />
+        </div>
     );
 });
 

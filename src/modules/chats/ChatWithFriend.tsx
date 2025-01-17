@@ -1,4 +1,4 @@
-import { FormEvent, useEffect, useRef, useState } from 'react';
+import { FormEvent, useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { jwtDecode } from 'jwt-decode';
@@ -21,15 +21,10 @@ const ChatWithFriend = () => {
     const dispatch = useDispatch();
     const token = localStorage.getItem('token');
     const { _id } = token ? jwtDecode<{ _id: string }>(token) : { _id: '' };
-    const endOfMessagesRef = useRef<HTMLDivElement | null>(null);
 
     const { handleTyping, resetTyping } = useTyping(socket, userId);
 
-    useEffect(() => {
-        if (endOfMessagesRef.current) {
-            endOfMessagesRef.current.scrollIntoView({ behavior: 'smooth' });
-        }
-    }, [messages]);
+    
 
     useEffect(() => {
 
@@ -104,23 +99,23 @@ const ChatWithFriend = () => {
     }
 
     return (
-        <div className="w-full h-full flex flex-col justify-between p-2">
-            <ChatHeader
-                friendProfile={friendProfile}
-                onBackClick={() => navigate('/chats')}
-                onMenuClick={() => alert(friendProfile.desc)}
-            />
-
-            <div className='w-full flex-1 overflow-y-auto no-scrollbar py-4'>
-                <MessageList messages={messages} _id={_id} />
-                <div ref={endOfMessagesRef} />
+        <div className="w-full h-full flex flex-col justify-between p-2 relative">
+            <div className='w-full h-auto max-sm:absolute top-0 bg-white z-10 max-sm:p-2'>
+                <ChatHeader
+                    friendProfile={friendProfile}
+                    onBackClick={() => navigate('/chats')}
+                    onMenuClick={() => alert(friendProfile.desc)}
+                />
             </div>
+            <MessageList messages={messages} _id={_id} />
 
-            <MessageInput
-                message={message}
-                onChange={handleMessageChange}
-                onSend={sendMessage}
-            />
+            <div className="w-full h-auto max-sm:px-3 max-sm:absolute bottom-0 bg-white z-10 ">
+                <MessageInput
+                    message={message}
+                    onChange={handleMessageChange}
+                    onSend={sendMessage}
+                />
+            </div>
         </div>
     );
 };

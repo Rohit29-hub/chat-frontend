@@ -11,6 +11,7 @@ type ChatHeaderProps = {
 
 const ChatHeader = ({ friendProfile, onBackClick, onMenuClick }: ChatHeaderProps) => {
     const {friendStatus: {userId, isTyping}} = useFriendStatus();
+    console.log(friendProfile);
     return (
         <nav className='w-full pb-2 border-b flex items-center justify-between'>
             <div className='flex items-center gap-x-2'>
@@ -25,9 +26,7 @@ const ChatHeader = ({ friendProfile, onBackClick, onMenuClick }: ChatHeaderProps
                     />
                     <span 
                         className={`absolute bottom-0 right-0 w-3 h-3 rounded-full border-2 border-white ${
-                            friendProfile.status === 'online' ? 'bg-green-500' :
-                            friendProfile.status === 'typing' ? 'bg-yellow-500' : 
-                            'bg-gray-500'
+                            friendProfile.status === 'true' ? 'bg-green-500' : 'bg-gray-500'
                         }`}
                     />
                 </div>
@@ -35,7 +34,7 @@ const ChatHeader = ({ friendProfile, onBackClick, onMenuClick }: ChatHeaderProps
                     <h1 className='text-xl font-medium'>{friendProfile.username}</h1>
                     <p className="text-sm text-gray-500">
                         {userId === friendProfile.user && isTyping ? 'Typing...' :
-                        friendProfile.status === 'online' ? 'Online' :
+                        friendProfile.status === 'true' ? 'Online' :
                         friendProfile.lastSeen ? `Last seen ${formatLastSeen(friendProfile.lastSeen)}` : 
                         'Offline'}
                     </p>

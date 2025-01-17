@@ -40,7 +40,7 @@ const UserList = ({ onlineUsers, mySocketId, onUserSelect }: UserListProps) => {
                                         alt={userData.username}
                                     />
                                     <span
-                                        className={`${userData.status === 'online' &&
+                                        className={`${userData.status === 'true' &&
                                             'absolute z-10 left-1 top-0 p-1.5 bg-green-400 rounded-full'
                                             }`}
                                     />

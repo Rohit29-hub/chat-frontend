@@ -76,7 +76,7 @@ const ChatHome = () => {
                 </div>
             </div>
 
-            <div className={`${showSideBar ? 'hidden' : 'block'} flex-1 h-full border overflow-hidden md:rounded-2xl bg-white md:shadow md:py-3 md:px-4'`}>
+            <div className={`${showSideBar ? 'hidden' : 'block'} flex-1 h-full border overflow-hidden md:rounded-2xl bg-white md:shadow  md:px-4'`}>
                 <Outlet context={[setShowSideBar]} />
             </div>
         </div>
