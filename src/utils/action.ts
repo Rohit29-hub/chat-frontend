@@ -3,6 +3,7 @@ type dataType = {
     receiver: string,
     message: string
     timestamps: string,
+    image?: string | null 
 }
 
 export const saveMessage = (token: string, data: dataType) => {
@@ -17,7 +18,8 @@ export const saveMessage = (token: string, data: dataType) => {
                 sender: data.sender,
                 message: data.message,
                 receiver: data.receiver,
-                timestamps: data.timestamps
+                timestamps: data.timestamps,
+                image: data.image 
             })
         }).then((data) => data.json())
             .then(() => console.log("message saved !"))

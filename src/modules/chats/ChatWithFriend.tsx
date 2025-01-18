@@ -13,6 +13,7 @@ import MessageInput from '../../components/chat/MessageInput';
 
 const ChatWithFriend = () => {
     const [friendProfile, setFriendProfile] = useState<userType | null>(null);
+    const [image, setImage] = useState<string | null>(null);
     const [message, setMessage] = useState("");
     const { userId } = useParams();
     const navigate = useNavigate();
@@ -24,7 +25,17 @@ const ChatWithFriend = () => {
 
     const { handleTyping, resetTyping } = useTyping(socket, userId);
 
-    
+
+    const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+        if (e.target.files) {
+            const selectedImage = e.target.files[0];
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                setImage(reader.result as string);
+            }
+            reader.readAsDataURL(selectedImage);
+        }
+    };
 
     useEffect(() => {
 
@@ -67,19 +78,29 @@ const ChatWithFriend = () => {
 
     const sendMessage = async (e: FormEvent) => {
         e.preventDefault();
-        if (!message.trim() || !socket) return;
 
+
+        if (!socket) return;
+        if (!message.trim() && !image) return;
+
+
+
+        if (!message.trim() && !image?.length) return;
         const messageData: MessageType = {
             sender: _id,
             receiver: userId!,
             message: message.trim(),
+            type: image ? 'image' : 'text',
+            image: image,
             timestamps: new Date().toISOString(),
         };
 
         try {
+
             if (socket.connected) {
                 socket.emit('message', messageData);
                 setMessage("");
+                setImage(null);
                 resetTyping();
             }
 
@@ -108,12 +129,14 @@ const ChatWithFriend = () => {
                 />
             </div>
             <MessageList messages={messages} _id={_id} />
-
             <div className="w-full h-auto max-sm:px-3 max-sm:absolute bottom-0 bg-white z-10 ">
                 <MessageInput
                     message={message}
                     onChange={handleMessageChange}
                     onSend={sendMessage}
+                    selectedImage={image}
+                    onImageSelect={handleImageSelect}
+                    onRemoveImage={() => setImage(null)}
                 />
             </div>
         </div>

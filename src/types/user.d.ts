@@ -14,6 +14,8 @@ export type MessageType = {
     receiver: string;
     message: string;
     timestamps: string;
+    type: 'image' | 'text',
+    image?: string | null
 }
 
 export type TypingData = {

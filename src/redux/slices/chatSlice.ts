@@ -1,15 +1,8 @@
 import { createSlice } from "@reduxjs/toolkit";
-
-type messageType = {
-    reciver: string,
-    sender: string,
-    message: string,
-    status: string,
-    timestamps: string
-}
+import { MessageType } from "../../types/user";
 
 type initialStateType = {
-    messages: Array<messageType> | null,
+    messages: Array<MessageType> | null,
 }
 const Chats = createSlice({
     name: 'chats',
