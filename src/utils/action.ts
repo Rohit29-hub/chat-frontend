@@ -3,10 +3,11 @@ type dataType = {
     receiver: string,
     message: string
     timestamps: string,
-    image?: string | null 
+    type: 'text' | 'image',
+    image?: string | null
 }
 
-export const saveMessage = (token: string, data: dataType) => {
+export const saveMessage = async (token: string, data: dataType) => {
     try {
         fetch(`${import.meta.env.VITE_APP_BACKEND_URL}/api/message/add_message`, {
             method: 'POST',
@@ -19,6 +20,7 @@ export const saveMessage = (token: string, data: dataType) => {
                 message: data.message,
                 receiver: data.receiver,
                 timestamps: data.timestamps,
+                type: data.type,
                 image: data.image 
             })
         }).then((data) => data.json())
@@ -27,8 +29,7 @@ export const saveMessage = (token: string, data: dataType) => {
     } catch (err: any) {
         console.log(err.message);
     }
-}
-
+};
 
 export const getMessage = async (token: string, userId: string, myId: string) => {
     try {
@@ -85,5 +86,26 @@ export const updateData = async (token: string, userId: string, updatedData: obj
         return data;
     } catch (err) {
         console.log(err);
+    }
+};
+
+export const uploadImage = async (token: string, file: File): Promise<string> => {
+    try {
+        const formData = new FormData();
+        formData.append("image", file);
+
+        // Send the image to the backend
+        const response = await fetch(`${import.meta.env.VITE_APP_BACKEND_URL}/api/cloudinary/upload_image`, {
+            method: "POST",
+            headers: {
+                'Authorization': token
+            },
+            body: formData,
+        });
+
+        const data = await response.json();
+        return data.imageUrl;
+    } catch (error) {
+        throw error;
     }
 };

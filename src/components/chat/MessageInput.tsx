@@ -6,11 +6,12 @@ type MessageInputProps = {
     onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
     onSend: (e: FormEvent) => void;
     onImageSelect: (e: React.ChangeEvent<HTMLInputElement>) => void;
-    selectedImage: string | null;
+    selectedImage: File | null;
     onRemoveImage: () => void;
 }
 
 const MessageInput = ({ message, onChange, onSend, onImageSelect, selectedImage, onRemoveImage }: MessageInputProps) => {
+    
     const handlePinClick = () => {
         const inputElement = document.getElementById('image-input') as HTMLInputElement;
         if (inputElement) inputElement.click();
@@ -22,7 +23,7 @@ const MessageInput = ({ message, onChange, onSend, onImageSelect, selectedImage,
             {selectedImage && (
                 <div className="absolute left-0 bottom-14 flex items-center gap-x-2">
                     <div className='relative'>
-                        <img src={selectedImage} alt="Selected Image" className="w-20 h-20 object-cover rounded-lg" />
+                        <img src={URL.createObjectURL(selectedImage)} alt="Selected Image" className="w-20 h-20 object-cover rounded-lg" />
                         {/* X icon to remove the selected image */}
                         <button onClick={onRemoveImage} className="bg-white absolute -right-2 -top-2 rounded-full p-1">
                             <X size={16} color="black" />

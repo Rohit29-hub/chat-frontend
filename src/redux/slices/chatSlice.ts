@@ -1,9 +1,18 @@
 import { createSlice } from "@reduxjs/toolkit";
-import { MessageType } from "../../types/user";
+
+type messageType = {
+    receiver: string,
+    sender: string,
+    message: string,
+    type: 'image' | 'text',
+    image: string | null,
+    timestamps: string
+}
 
 type initialStateType = {
-    messages: Array<MessageType> | null,
+    messages: Array<messageType> | null,
 }
+
 const Chats = createSlice({
     name: 'chats',
     initialState: {
@@ -11,9 +20,9 @@ const Chats = createSlice({
     } as initialStateType,
     reducers: {
         addMessage: (state, action) => {
-            if(state.messages == null){
+            if (state.messages == null) {
                 state.messages = [action.payload];
-            }else{
+            } else {
                 state.messages.push(action.payload);
             }
         },
@@ -23,5 +32,5 @@ const Chats = createSlice({
     }
 })
 
-export const { addMessage,addMessages } = Chats.actions
+export const { addMessage, addMessages } = Chats.actions
 export default Chats.reducer;

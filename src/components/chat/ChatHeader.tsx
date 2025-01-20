@@ -12,6 +12,8 @@ type ChatHeaderProps = {
 const ChatHeader = ({ friendProfile, onBackClick, onMenuClick }: ChatHeaderProps) => {
     const {friendStatus: {userId, isTyping}} = useFriendStatus();
 
+    console.log(friendProfile);
+
     return (
         <nav className='w-full pb-2 border-b flex items-center justify-between'>
             <div className='flex items-center gap-x-2'>
