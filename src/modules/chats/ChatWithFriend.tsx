@@ -65,6 +65,7 @@ const ChatWithFriend = () => {
         const getMessageHistory = async () => {
             try {
                 const parsedMessages = await getMessage(token!, userId!, _id);
+                console.log(parsedMessages);
                 dispatch(addMessages(parsedMessages));
             } catch (error) {
                 console.error('Error fetching messages:', error);

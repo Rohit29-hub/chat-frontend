@@ -41,6 +41,7 @@ export const getMessage = async (token: string, userId: string, myId: string) =>
             }
         })
         const data = await response.json();
+        console.log(data);
         const parsedMessages = data.messages_data.map((messageString: string) => JSON.parse(messageString))
         return parsedMessages;
     } catch (err) {
