@@ -41,7 +41,7 @@ const MessageList = React.memo(({ messages, imageLoader, setImageLoader, _id }: 
                                 ) : msgDetails.type === 'image' && msgDetails.image ? (
                                     <div className="relative">
                                         <img
-                                            src={msgDetails.image}
+                                            src={msgDetails.image instanceof File ? URL.createObjectURL(msgDetails.image) : msgDetails.image}
                                             alt="Message Image"
                                             className="max-w-[200px] max-h-[200px] object-cover rounded-lg"
                                             onLoad={handleImageLoad} // Trigger once image is loaded
