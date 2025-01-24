@@ -1,35 +1,43 @@
 type dataType = {
     sender: string,
     receiver: string,
-    message: string
+    message: string,
     timestamps: string,
     type: 'text' | 'image',
-    image?: string | null
+    image?: File | null
 }
 
 export const saveMessage = async (token: string, data: dataType) => {
     try {
+        const formData = new FormData();
+        
+        // Append fields to the FormData object
+        formData.append("sender", data.sender);
+        formData.append("receiver", data.receiver);
+        formData.append("message", data.message);
+        formData.append("timestamps", data.timestamps);
+        formData.append("type", data.type);
+    
+        if (data.image) {
+            formData.append("image", data.image);
+        }
+
+        // Send the request with FormData
         fetch(`${import.meta.env.VITE_APP_BACKEND_URL}/api/message/add_message`, {
             method: 'POST',
             headers: {
-                'Content-Type': 'application/json',
-                'Authorization': token
+                'Authorization': token,
             },
-            body: JSON.stringify({
-                sender: data.sender,
-                message: data.message,
-                receiver: data.receiver,
-                timestamps: data.timestamps,
-                type: data.type,
-                image: data.image 
-            })
-        }).then((data) => data.json())
-            .then(() => console.log("message saved !"))
-            .catch((err) => console.error(err.message))
+            body: formData,
+        })
+        .then((response) => response.json())
+        .then((result) => console.log("Message saved!", result))
+        .catch((err) => console.error("Error:", err.message));
     } catch (err: any) {
-        console.log(err.message);
+        console.log("Error:", err.message);
     }
 };
+
 
 export const getMessage = async (token: string, userId: string, myId: string) => {
     try {
@@ -41,9 +49,7 @@ export const getMessage = async (token: string, userId: string, myId: string) =>
             }
         })
         const data = await response.json();
-        console.log(data);
-        const parsedMessages = data.messages_data.map((messageString: string) => JSON.parse(messageString))
-        return parsedMessages;
+        return data.messages;
     } catch (err) {
         console.log(err);
     }
@@ -87,26 +93,5 @@ export const updateData = async (token: string, userId: string, updatedData: obj
         return data;
     } catch (err) {
         console.log(err);
-    }
-};
-
-export const uploadImage = async (token: string, file: File): Promise<string> => {
-    try {
-        const formData = new FormData();
-        formData.append("image", file);
-
-        // Send the image to the backend
-        const response = await fetch(`${import.meta.env.VITE_APP_BACKEND_URL}/api/cloudinary/upload_image`, {
-            method: "POST",
-            headers: {
-                'Authorization': token
-            },
-            body: formData,
-        });
-
-        const data = await response.json();
-        return data.imageUrl;
-    } catch (error) {
-        throw error;
     }
 };

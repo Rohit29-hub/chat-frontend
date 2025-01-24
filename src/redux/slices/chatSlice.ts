@@ -20,10 +20,18 @@ const Chats = createSlice({
     } as initialStateType,
     reducers: {
         addMessage: (state, action) => {
+            const { image, ...rest } = action.payload;
+            const processedImage = image instanceof File ? URL.createObjectURL(image) : image;
+        
+            const newMessage = {
+                ...rest,
+                image: processedImage,
+            };
+        
             if (state.messages == null) {
-                state.messages = [action.payload];
+                state.messages = [newMessage];
             } else {
-                state.messages.push(action.payload);
+                state.messages.push(newMessage);
             }
         },
         addMessages: (state, action) => {

@@ -6,12 +6,13 @@ import { addMessage, addMessages } from '../../redux/slices/chatSlice';
 import { useSocket } from '../../context/socketProvider';
 import { MessageType, userType } from '../../types/user';
 import { useTyping } from '../../hooks/useTyping';
-import { getData, getMessage, saveMessage, uploadImage } from '../../utils/action';
+import { getData, getMessage, saveMessage } from '../../utils/action';
 import ChatHeader from '../../components/chat/ChatHeader';
 import MessageList from '../../components/ui/MessageList';
 import MessageInput from '../../components/chat/MessageInput';
 
 const MAX_IMAGE_SIZE = 5 * 1024 * 1024;
+const ALLOWED_FILE_TYPES = ['image/jpeg', 'image/jpg', 'image/png'];
 
 const ChatWithFriend = () => {
     const [friendProfile, setFriendProfile] = useState<userType | null>(null);
@@ -32,13 +33,18 @@ const ChatWithFriend = () => {
     const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
         if (e.target.files) {
             const selectedImage = e.target.files[0];
-            
-            if (selectedImage && selectedImage.size > MAX_IMAGE_SIZE) {
-                alert("File is too large! Please upload an image smaller than 5MB.");
-                return;
-            }
+    
+            if (selectedImage) {
+                if (selectedImage.size > MAX_IMAGE_SIZE) {
+                    return alert("File is too large! Please upload an image smaller than 5MB.");
+                }
 
-            setImage(selectedImage);
+                if (!ALLOWED_FILE_TYPES.includes(selectedImage.type)) {
+                    return alert("Invalid file type! Please upload a JPEG, JPG, or PNG image.");
+                }
+
+                setImage(selectedImage);
+            }
         }
     };
 
@@ -65,7 +71,6 @@ const ChatWithFriend = () => {
         const getMessageHistory = async () => {
             try {
                 const parsedMessages = await getMessage(token!, userId!, _id);
-                console.log(parsedMessages);
                 dispatch(addMessages(parsedMessages));
             } catch (error) {
                 console.error('Error fetching messages:', error);
@@ -75,6 +80,7 @@ const ChatWithFriend = () => {
         if (token && userId && _id) {
             getMessageHistory();
         }
+
     }, [userId, token, _id, dispatch]);
 
     const handleMessageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -94,27 +100,18 @@ const ChatWithFriend = () => {
             receiver: userId!,
             message: message.trim(),
             type: image != null ? 'image' : 'text',
-            image: null,
+            image: image,
             timestamps: new Date().toISOString(),
         };
 
-        // if user sending image
-        if (image) {
-            setImageLoader(true);
-            const imageUrl = await uploadImage(token!, image);
-            messageData.image = imageUrl;
-            setImage(null)
-        }
-
         try {
             dispatch(addMessage(messageData));
-            socket.emit('message', messageData);
-
+            saveMessage(token!, messageData);
+            
             setMessage("");
+            setImage(null);
             resetTyping();
             setImageLoader(false);
-
-            await saveMessage(token!, messageData);
         } catch (error) {
             console.error('Error sending message:', error);
         }

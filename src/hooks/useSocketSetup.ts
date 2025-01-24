@@ -27,6 +27,7 @@ export const useSocketSetup = ({
         });
 
         socket.on('message', (data: MessageType) => {
+            console.log(data);
             dispatch(addMessage(data));
         });
 
@@ -37,6 +38,10 @@ export const useSocketSetup = ({
         socket.on('disconnect', () => {
             handleSocket(null);
         });
+
+        socket.on('hello', (data) => {
+            console.log(data);
+        })
 
         return () => {
             socket.disconnect();
